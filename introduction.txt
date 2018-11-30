@@ -1,0 +1,28 @@
+特征说明
+
+city：城市
+week_start_date：每一周开始的日期
+
+station_max_temp_c – Maximum temperature    区域最高温度
+station_min_temp_c – Minimum temperature    区域最低温度
+station_avg_temp_c – Average temperature    区域平均温度
+station_precip_mm – Total precipitation     区域总降水量
+station_diur_temp_rng_c – Diurnal temperature range     昼夜温差
+
+precipitation_amt_mm – Total precipitation
+
+reanalysis_sat_precip_amt_mm – Total precipitation
+reanalysis_dew_point_temp_k – Mean dew point temperature
+reanalysis_air_temp_k – Mean air temperature
+reanalysis_relative_humidity_percent – Mean relative humidity
+reanalysis_specific_humidity_g_per_kg – Mean specific humidity
+reanalysis_precip_amt_kg_per_m2 – Total precipitation
+reanalysis_max_air_temp_k – Maximum air temperature
+reanalysis_min_air_temp_k – Minimum air temperature
+reanalysis_avg_temp_k – Average air temperature
+reanalysis_tdtr_k – Diurnal temperature range
+
+ndvi_se – Pixel southeast of city centroid
+ndvi_sw – Pixel southwest of city centroid
+ndvi_ne – Pixel northeast of city centroid
+ndvi_nw – Pixel northwest of city centroid
