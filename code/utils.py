@@ -7,14 +7,14 @@ import numpy as np
 
 warnings.filterwarnings('ignore')
 
-TRAIN_FEATURE_PATH = r'../input/dengue_features_train.csv'
-TRAIN_LABEL_PATH = r'../input/dengue_labels_train.csv'
+TRAIN_FEATURE_PATH = '../input/dengue_features_train.csv'
+TRAIN_LABEL_PATH = '../input/dengue_labels_train.csv'
 TEST_FEATURE_PATH = '../input/dengue_features_test.csv'
 
 
 def generate_submission(df_test, y_pred, path):
     df_test['total_cases'] = moving_average_2(y_pred)
-    df_test['total_cases'] = df_test['total_cases'].apply(lambda x: int(x if x > 0 else 0))
+    # df_test['total_cases'] = df_test['total_cases'].apply(lambda x: int(x if x > 0 else 0))
     if not path:
         df_test.to_csv(path, index=False)
     return df_test

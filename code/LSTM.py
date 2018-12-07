@@ -1,29 +1,30 @@
 import torch
 import torch.utils.data
 import torch.nn as nn
+from torch.optim.lr_scheduler import StepLR
 import numpy as np
 from utils import load_data_by_city, generate_sequence_feature, generate_submission_2
 from sklearn.model_selection import train_test_split
 from logger import Logger
 
-
-
-SEQUENCE_LENGTH = 3
+BATCH_SIZE = 16
+SEQUENCE_LENGTH = 10
 INPUT_SIZE = 22
 EVAL_SIZE = 0.3
-HIDDEN_SIZE = 256
+HIDDEN_SIZE = 128
 NUM_LAYERS = 2
-NUM_EPOCHS = 1000
-LEARNING_RATE = 0.001
+NUM_EPOCHS = 512
+LEARNING_RATE = 0.01
+LR_STEP_SIZE = NUM_EPOCHS // 3
+LR_GAMMA = 0.1
 DEVICE = torch.device('cuda')
 
-torch.backends.cudnn.enabled = False
+# torch.backends.cudnn.enabled = True
 
 
 class DengueData(torch.utils.data.Dataset):
     def __init__(self, city, dataset_name):
         """
-
         :param city:
         :param dataset_name: 数据集的哪一部分 train：训练集， val：验证集， test：测试集， train_all:训练集+验证集
         """
@@ -90,32 +91,36 @@ class RNN(nn.Module):
 
 
 def train(city):
-    print('preparing data ... ')
+    print('start training ... ')
     is_val = False
     model = RNN(INPUT_SIZE, HIDDEN_SIZE, NUM_LAYERS).to(DEVICE)
     criterion = nn.L1Loss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     train_data = DengueData(city, 'train_all')
-    train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=16, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
     total_step = len(train_loader)
 
     logger = Logger('../output/logs_%s' % city)
-    print('start training ... ')
+    scheduler = StepLR(optimizer, LR_STEP_SIZE * total_step, LR_GAMMA)
     for epoch in range(NUM_EPOCHS):
         for i, (features, labels) in enumerate(train_loader):
             features = features.reshape(-1, SEQUENCE_LENGTH, INPUT_SIZE).float().to(DEVICE)
             labels = labels.to(DEVICE).float()
             outputs = model(features)
+            print(outputs)
             loss = criterion(outputs.reshape(-1), labels)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            scheduler.step()
             if (i+1) % 5 == 0:
                 print('Epoch[%d/%d], step[%d/%d], Loss:%.5f' % (epoch+1, NUM_EPOCHS, i+1, total_step, loss.item()))
+                # print('epoch:%d, step:%d, learning_rate:%.5f' % (epoch, i, scheduler.get_lr()[0]))
                 logger.scalar_summary('loss', loss.item(), epoch * total_step + i + 1)
+                logger.scalar_summary('learning_rate', scheduler.get_lr()[0], epoch * total_step + i + 1)
+
         if is_val:
             print('Epoch % d Start validating' % epoch)
             val_data = DengueData(city, 'val')
@@ -148,7 +153,6 @@ def predict(city):
     logger = Logger('../output/logs_%s' % city)
     for i, each in enumerate(outputs):
         logger.scalar_summary('prediction', int(each), i+1)
-        pass
     return outputs
 
 

@@ -69,7 +69,7 @@ class Transformer2:
         self.is_train = is_train
         self.city = city
         self.other_params = kwargs
-        self.ef_file = '..\config\%s_min_max_scale.pkl' % self.city
+        self.ef_file = '../config/%s_min_max_scale.pkl' % self.city
 
         if self.is_train:
             self.config = {}
